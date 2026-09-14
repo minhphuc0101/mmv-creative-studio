@@ -113,8 +113,13 @@ export default function CreativeStudioPage() {
 
   // One-click refinement loop
   const handleRefine = (tweak: string) => {
-    const updated = `${prompt}. Note: ${tweak}.`;
-    setPrompt(updated);
+    if (!prompt.trim()) {
+      setPrompt(tweak);
+    } else {
+      const trimmed = prompt.trim();
+      const separator = trimmed.endsWith(".") ? " " : ". ";
+      setPrompt(`${trimmed}${separator}${tweak}`);
+    }
   };
 
   // Select a past audit log from Recent drawer
@@ -176,6 +181,7 @@ export default function CreativeStudioPage() {
           setReferenceImage={setReferenceImage}
           onGenerate={handleGenerate}
           onEnhance={handleEnhance}
+          onRefine={handleRefine}
           isGenerating={isGenerating}
           isEnhancing={isEnhancing}
           catalog={catalog}

@@ -15,6 +15,7 @@ interface BriefPanelProps {
   setReferenceImage: (v: string) => void;
   onGenerate: () => void;
   onEnhance: () => void;
+  onRefine: (tweakText: string) => void;
   isGenerating: boolean;
   isEnhancing: boolean;
   catalog: VehicleModel[];
@@ -31,6 +32,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
   setReferenceImage,
   onGenerate,
   onEnhance,
+  onRefine,
   isGenerating,
   isEnhancing,
   catalog,
@@ -115,6 +117,47 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
           placeholder="Describe in detail what you want to see in your image (e.g. Red Xforce parked in showroom at dusk with festive lights)..."
           className="w-full text-xs p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 resize-none text-gray-900 shadow-sm"
         />
+      </div>
+
+      {/* Quick Refine Pills in Brief */}
+      <div className="space-y-1.5 -mt-2">
+        <div className="flex items-center justify-between text-[11px] font-semibold text-gray-500">
+          <span>Refine & Quick Styles:</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            type="button"
+            onClick={() => onRefine("Ánh sáng hoàng hôn ấm áp và phản chiếu mặt đường")}
+            className="text-[11px] bg-gray-50 hover:bg-amber-50 border border-gray-200 hover:border-amber-400 px-2.5 py-1 rounded-full text-gray-700 hover:text-amber-800 font-medium transition cursor-pointer flex items-center space-x-1"
+          >
+            <span>✨</span>
+            <span>Ánh sáng ấm</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onRefine("Đặt xe trong showroom hiện đại sang trọng với sàn đá bóng và đèn chùm")}
+            className="text-[11px] bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-400 px-2.5 py-1 rounded-full text-gray-700 hover:text-blue-800 font-medium transition cursor-pointer flex items-center space-x-1"
+          >
+            <span>✨</span>
+            <span>Showroom</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onRefine("Đang chạy trên đường đèo Đà Lạt uốn lượn, rừng thông bạt ngàn và sương sớm")}
+            className="text-[11px] bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-400 px-2.5 py-1 rounded-full text-gray-700 hover:text-emerald-800 font-medium transition cursor-pointer flex items-center space-x-1"
+          >
+            <span>✨</span>
+            <span>Đèo Đà Lạt</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onRefine("Góc chụp chính diện 3/4 phía trước làm nổi bật lưới tản nhiệt Dynamic Shield")}
+            className="text-[11px] bg-gray-50 hover:bg-purple-50 border border-gray-200 hover:border-purple-400 px-2.5 py-1 rounded-full text-gray-700 hover:text-purple-800 font-medium transition cursor-pointer flex items-center space-x-1"
+          >
+            <span>✨</span>
+            <span>Góc 3/4</span>
+          </button>
+        </div>
       </div>
 
       {/* Model Pill */}

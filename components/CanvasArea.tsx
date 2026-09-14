@@ -10,7 +10,7 @@ interface CanvasAreaProps {
   prompt: string;
   aspectRatio: AspectRatio;
   onSelectExample: (promptText: string) => void;
-  onRefine: (tweakText: string) => void;
+  onRefine?: (tweakText: string) => void;
   onRegenerate: () => void;
   isGenerating: boolean;
 }
@@ -20,7 +20,6 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   prompt,
   aspectRatio,
   onSelectExample,
-  onRefine,
   onRegenerate,
   isGenerating,
 }) => {
@@ -144,46 +143,26 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
             )}
           </div>
 
-          {/* Post-generation Toolbar & Refinement Loop */}
+          {/* Post-generation Toolbar */}
           {!isGenerating && currentImage && (
-            <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3 w-full max-w-xl justify-between">
-              {/* Refinement Pills */}
-              <div className="flex items-center space-x-2 overflow-x-auto py-1">
-                <span className="text-[11px] font-semibold text-gray-500">Refine:</span>
-                <button
-                  onClick={() => onRefine("Enhance with warmer golden hour lighting and wet showroom floor reflections")}
-                  className="text-xs bg-white border border-gray-200 hover:border-blue-400 px-2.5 py-1 rounded-full text-gray-700 font-medium shadow-2xs transition"
-                >
-                  ✨ Warmer lighting
-                </button>
-                <button
-                  onClick={() => onRefine("Set vehicle inside a brightly illuminated modern glass dealership showroom")}
-                  className="text-xs bg-white border border-gray-200 hover:border-blue-400 px-2.5 py-1 rounded-full text-gray-700 font-medium shadow-2xs transition"
-                >
-                  ✨ Showroom setting
-                </button>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={onRegenerate}
-                  className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition"
-                >
-                  <RefreshCw className="w-3.5 h-3.5 text-gray-500" />
-                  <span>Re-roll</span>
-                </button>
-                <a
-                  href={currentImage}
-                  download="MMV_Marketing_Campaign.jpg"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center space-x-1.5 text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download High-Res</span>
-                </a>
-              </div>
+            <div className="flex items-center justify-end space-x-2 w-full max-w-xl">
+              <button
+                onClick={onRegenerate}
+                className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-gray-500" />
+                <span>Re-roll</span>
+              </button>
+              <a
+                href={currentImage}
+                download="MMV_Marketing_Campaign.jpg"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center space-x-1.5 text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download High-Res</span>
+              </a>
             </div>
           )}
         </div>
