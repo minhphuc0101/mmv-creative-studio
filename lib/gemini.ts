@@ -25,15 +25,13 @@ export async function enhancePromptWithGemini(
       const parts: any[] = [
         {
           text: `Sales consultant brief: "${userPrompt}". 
-Transform this brief into an ultra-photorealistic commercial automotive photography prompt for Imagen 3 / Nano Banana Pro 2.
+Transform this brief into a single, cohesive, ultra-photorealistic commercial automotive image prompt for Nano Banana Pro.
 
-STRICT BRAND & CONTEXT RULES:
-1. VEHICLE: The car MUST be an authentic Mitsubishi Motors vehicle (Mitsubishi Xforce, Mitsubishi Xpander Cross, All-New Triton, Outlander).
-   If a reference car image is attached, inspect the image to detect the exact model, color, and angle, and preserve that vehicle in the prompt.
-   ABSOLUTELY NEVER generate a competitor vehicle (No Mercedes, BMW, Toyota, Ford, Hyundai, Kia, Honda).
-2. CONTEXT & ENVIRONMENT: Faithfully capture the user's requested scenario (e.g. "đèo đi đà lạt" = winding mountain pass road to Da Lat Vietnam with pine forests and morning fog; "showroom" = luxury illuminated modern dealership; "biển" = coastal road).
-3. CAMERA & QUALITY: 8k commercial car advertisement photography, Hasselblad 50mm f/2.8, raytraced reflections, motion blur on wheels if moving, authentic Dynamic Shield grille and T-shape LED lights.
-4. Output ONLY the raw prompt text without quotes or markdown preamble.`,
+STRICT INSTRUCTIONS:
+1. OUTPUT FORMAT: Output ONLY ONE single continuous paragraph of descriptive English prompt text. Never output scene breakdowns, TV commercials, scripts, markdown headings, or conversational intros.
+2. VEHICLE: Feature a genuine Mitsubishi Motors vehicle (e.g. 2025 Mitsubishi Xforce, Mitsubishi Xpander Cross, All-New Triton). Emphasize the iconic Dynamic Shield front grille and T-shape LED headlights. If a reference photo of a car is attached, detect its model and color and preserve that vehicle. NEVER generate a competitor brand (No Mercedes, BMW, Toyota, Ford, Hyundai, Kia, Honda).
+3. ENVIRONMENT: Accurately translate the requested Vietnamese setting (e.g. "đèo đà lạt" = driving along a scenic winding mountain pass road toward Da Lat, Vietnam, through misty pine forests with morning sunbeams; "showroom" = luxury illuminated dealership).
+4. QUALITY: 8k resolution, commercial car advertising photography, 50mm lens, raytraced reflections, realistic road motion blur.`,
         },
       ];
 
@@ -58,8 +56,8 @@ STRICT BRAND & CONTEXT RULES:
           },
         ],
         generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 350,
+          temperature: 0.4,
+          maxOutputTokens: 600,
         },
       });
 
