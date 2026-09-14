@@ -28,10 +28,13 @@ export async function enhancePromptWithGemini(
 Transform this brief into a single, cohesive, ultra-photorealistic commercial automotive image prompt for Nano Banana Pro.
 
 STRICT INSTRUCTIONS:
-1. OUTPUT FORMAT: Output ONLY ONE single continuous paragraph of descriptive English prompt text. Never output scene breakdowns, TV commercials, scripts, markdown headings, or conversational intros.
-2. VEHICLE: Feature a genuine Mitsubishi Motors vehicle (e.g. 2025 Mitsubishi Xforce, Mitsubishi Xpander Cross, All-New Triton). Emphasize the iconic Dynamic Shield front grille and T-shape LED headlights. If a reference photo of a car is attached, detect its model and color and preserve that vehicle. NEVER generate a competitor brand (No Mercedes, BMW, Toyota, Ford, Hyundai, Kia, Honda).
-3. ENVIRONMENT: Accurately translate the requested Vietnamese setting (e.g. "đèo đà lạt" = driving along a scenic winding mountain pass road toward Da Lat, Vietnam, through misty pine forests with morning sunbeams; "showroom" = luxury illuminated dealership).
-4. QUALITY: 8k resolution, commercial car advertising photography, 50mm lens, raytraced reflections, realistic road motion blur.`,
+1. LANGUAGE MATCHING: The output prompt MUST be in the EXACT SAME LANGUAGE as the sales consultant brief.
+   - If the brief is in Vietnamese, write the entire enhanced prompt in vivid, natural, professional Vietnamese.
+   - If the brief is in English, write in English.
+2. OUTPUT FORMAT: Output ONLY ONE single continuous paragraph of descriptive prompt text. Never output scene breakdowns, TV commercials, scripts, markdown headings, or conversational intros.
+3. VEHICLE: Feature an authentic Mitsubishi Motors vehicle (e.g. 2025 Mitsubishi Xforce, Mitsubishi Xpander Cross, All-New Triton). Emphasize the iconic Dynamic Shield front grille and T-shape LED headlights. If a reference photo of a car is attached, detect its model and color and preserve that vehicle. NEVER generate a competitor brand (No Mercedes, BMW, Toyota, Ford, Hyundai, Kia, Honda).
+4. ENVIRONMENT: Accurately capture the requested setting (e.g. "đèo đà lạt" = cung đường đèo uốn lượn tại Đà Lạt, rừng thông bạt ngàn trong sương sớm và ánh nắng ban mai; "showroom" = phòng trưng bày sang trọng hiện đại).
+5. QUALITY: 8k resolution, commercial car advertising photography, 50mm lens, raytraced reflections, realistic road motion blur.`,
         },
       ];
 
