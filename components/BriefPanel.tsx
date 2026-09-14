@@ -16,10 +16,55 @@ interface BriefPanelProps {
   onGenerate: () => void;
   onEnhance: () => void;
   onRefine: (tweakText: string) => void;
+  selectedUseCase?: string;
+  setSelectedUseCase?: (v: string) => void;
   isGenerating: boolean;
   isEnhancing: boolean;
   catalog?: VehicleModel[];
 }
+
+export interface UseCaseOption {
+  id: string;
+  label: string;
+  icon: string;
+  refineText: string;
+  defaultRatio?: AspectRatio;
+}
+
+export const USE_CASES: UseCaseOption[] = [
+  {
+    id: "ads",
+    label: "Hình ads",
+    icon: "📢",
+    refineText: "Hình ảnh quảng cáo thương mại (Ads) nổi bật xe và thông điệp bán hàng chuyên nghiệp",
+    defaultRatio: "1:1",
+  },
+  {
+    id: "banner",
+    label: "Hình Banner theo size của AI",
+    icon: "🖼️",
+    refineText: "Hình banner ngang góc rộng theo kích thước chuẩn của AI, bố cục có khoảng trống chèn thông điệp quảng cáo",
+    defaultRatio: "16:9",
+  },
+  {
+    id: "mascot",
+    label: "Hình Mascot",
+    icon: "🦊",
+    refineText: "Hình ảnh mascot linh vật đại diện thương hiệu 3D phong cách hoạt hình sinh động, mang màu sắc và logo Mitsubishi Motors",
+  },
+  {
+    id: "resize",
+    label: "Resize hình",
+    icon: "📐",
+    refineText: "Resize và mở rộng bố cục ngoại cảnh (outpainting) hài hòa với tỷ lệ khung hình mới",
+  },
+  {
+    id: "change_scene",
+    label: "Hình chụp xe đổi bối cảnh",
+    icon: "🔄",
+    refineText: "Giữ nguyên chính xác 100% chiếc xe từ ảnh chụp thực tế (Input Image) và thay đổi toàn bộ bối cảnh xung quanh",
+  },
+];
 
 export const BriefPanel: React.FC<BriefPanelProps> = ({
   prompt,
@@ -33,6 +78,8 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
   onGenerate,
   onEnhance,
   onRefine,
+  selectedUseCase = "",
+  setSelectedUseCase = () => {},
   isGenerating,
   isEnhancing,
   catalog,
@@ -149,44 +196,45 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
         />
       </div>
 
-      {/* Quick Refine Pills in Brief */}
+      {/* Nhu cầu tạo hình / Use Case Options for Prompt Refine */}
       <div className="space-y-1.5 -mt-2">
-        <div className="flex items-center justify-between text-[11px] font-semibold text-gray-500">
-          <span>Refine & Quick Styles:</span>
+        <div className="flex items-center justify-between text-[11px] font-semibold text-gray-600">
+          <span>Nhu cầu tạo hình (Chọn để refine prompt):</span>
+          {selectedUseCase && (
+            <button
+              type="button"
+              onClick={() => setSelectedUseCase("")}
+              className="text-[10px] text-gray-400 hover:text-red-500 transition cursor-pointer"
+            >
+              Đặt lại
+            </button>
+          )}
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          <button
-            type="button"
-            onClick={() => onRefine("Ánh sáng hoàng hôn ấm áp và phản chiếu mặt đường")}
-            className="text-[11px] bg-gray-50 hover:bg-amber-50 border border-gray-200 hover:border-amber-400 px-2.5 py-1 rounded-full text-gray-700 hover:text-amber-800 font-medium transition cursor-pointer flex items-center space-x-1"
-          >
-            <span>✨</span>
-            <span>Ánh sáng ấm</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onRefine("Đặt xe trong showroom hiện đại sang trọng với sàn đá bóng và đèn chùm")}
-            className="text-[11px] bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-400 px-2.5 py-1 rounded-full text-gray-700 hover:text-blue-800 font-medium transition cursor-pointer flex items-center space-x-1"
-          >
-            <span>✨</span>
-            <span>Showroom</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onRefine("Đang chạy trên đường đèo Đà Lạt uốn lượn, rừng thông bạt ngàn và sương sớm")}
-            className="text-[11px] bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-400 px-2.5 py-1 rounded-full text-gray-700 hover:text-emerald-800 font-medium transition cursor-pointer flex items-center space-x-1"
-          >
-            <span>✨</span>
-            <span>Đèo Đà Lạt</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onRefine("Góc chụp chính diện 3/4 phía trước làm nổi bật lưới tản nhiệt Dynamic Shield")}
-            className="text-[11px] bg-gray-50 hover:bg-purple-50 border border-gray-200 hover:border-purple-400 px-2.5 py-1 rounded-full text-gray-700 hover:text-purple-800 font-medium transition cursor-pointer flex items-center space-x-1"
-          >
-            <span>✨</span>
-            <span>Góc 3/4</span>
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          {USE_CASES.map((uc) => {
+            const isSelected = selectedUseCase === uc.label;
+            return (
+              <button
+                key={uc.id}
+                type="button"
+                onClick={() => {
+                  setSelectedUseCase(uc.label);
+                  onRefine(uc.refineText);
+                  if (uc.defaultRatio) {
+                    setAspectRatio(uc.defaultRatio);
+                  }
+                }}
+                className={`text-left text-xs px-2.5 py-2 rounded-lg border transition cursor-pointer flex items-center space-x-2 ${
+                  isSelected
+                    ? "bg-blue-50 border-blue-500 text-blue-900 font-semibold shadow-2xs ring-1 ring-blue-500"
+                    : "bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:border-gray-300"
+                } ${uc.id === "change_scene" ? "sm:col-span-2" : ""}`}
+              >
+                <span className="text-sm">{uc.icon}</span>
+                <span className="truncate">{uc.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

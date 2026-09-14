@@ -3,7 +3,8 @@ import { getActiveBrandConfig } from "./brand-rules";
 
 export async function enhancePromptWithGemini(
   userPrompt: string,
-  referenceImage?: string
+  referenceImage?: string,
+  selectedUseCase?: string
 ): Promise<{
   enhancedPrompt: string;
   tokens: { prompt: number; completion: number };
@@ -22,6 +23,17 @@ export async function enhancePromptWithGemini(
         systemInstruction: brandConfig.system_instruction,
       });
 
+      let useCaseContext = "";
+      if (selectedUseCase) {
+        useCaseContext = `\n6. SPECIALIZED MARKETING USE-CASE: "${selectedUseCase}".
+Please tailor the prompt specifically according to this intent:
+- 'Hình ads': Focus on dramatic commercial vehicle hero shot, pristine lighting, crisp reflections, dynamic advertising appeal.
+- 'Hình Banner theo size của AI': Wide panoramic composition, vehicle framed to one side with balanced negative space on the other side for promotional text and headlines.
+- 'Hình Mascot': Feature a friendly, charming 3D character mascot (Pixar/Disney 3D animation style) in Mitsubishi racing/dealer attire standing proudly alongside or presenting the vehicle.
+- 'Resize hình': Outpainting and seamlessly extending the background environment around the vehicle for flexible multi-format display without distorting vehicle proportions.
+- 'Hình chụp xe đổi bối cảnh': Strictly preserve the vehicle from the reference image (model, angle, exact body paint color) while replacing the entire background with the requested setting.`;
+      }
+
       const parts: any[] = [
         {
           text: `Sales consultant brief: "${userPrompt}". 
@@ -37,7 +49,7 @@ STRICT INSTRUCTIONS:
    - If no vehicle model is specified by the user, default to 2025 Mitsubishi Xforce.
    - STRICT COMPLIANCE: NEVER generate competitor brands (No Mercedes-Benz, BMW, Audi, Toyota, Hyundai, Kia, Ford, Honda).
 4. OUTPUT FORMAT: Output ONLY ONE single continuous paragraph of descriptive prompt text without markdown bullets, headings, conversational preamble, or scene breakdowns.
-5. PHOTOGRAPHY DETAILS: 8k resolution, cinematic automotive advertising photography, 50mm lens, raytraced reflections, realistic road motion blur.`,
+5. PHOTOGRAPHY DETAILS: 8k resolution, cinematic automotive advertising photography, 50mm lens, raytraced reflections, realistic road motion blur.${useCaseContext}`,
         },
       ];
 

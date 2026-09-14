@@ -24,6 +24,7 @@ export default function CreativeStudioPage() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isRecentOpen, setIsRecentOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [selectedUseCase, setSelectedUseCase] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [catalog, setCatalog] = useState<VehicleModel[]>([]);
@@ -61,7 +62,7 @@ export default function CreativeStudioPage() {
       const res = await fetch("/api/enhance-prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userPrompt: prompt, referenceImage }),
+        body: JSON.stringify({ userPrompt: prompt, referenceImage, selectedUseCase }),
       });
 
       const data = await res.json();
@@ -185,6 +186,8 @@ export default function CreativeStudioPage() {
           onGenerate={handleGenerate}
           onEnhance={handleEnhance}
           onRefine={handleRefine}
+          selectedUseCase={selectedUseCase}
+          setSelectedUseCase={setSelectedUseCase}
           isGenerating={isGenerating}
           isEnhancing={isEnhancing}
           catalog={catalog}

@@ -48,10 +48,10 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
     },
     {
       step: "02",
-      title: "Dùng Refine & Quick Styles",
-      badge: "Phong cách nhanh",
-      desc: "Bấm các nút phong cách có sẵn ngay dưới hộp Prompt: ✨ Ánh sáng ấm, ✨ Showroom, ✨ Đèo Đà Lạt, ✨ Góc 3/4. Các phong cách này sẽ tự động thêm vào prompt chỉ với 1 cú click.",
-      tip: "Bạn có thể bấm kết hợp nhiều phong cách để tạo bối cảnh phong phú hơn.",
+      title: "Chọn Nhu cầu tạo hình (Refine Prompt)",
+      badge: "Mục đích sử dụng",
+      desc: "Chọn 1 trong 5 nhu cầu chuyên biệt: 📢 Hình ads, 🖼️ Hình Banner theo size của AI, 🦊 Hình Mascot, 📐 Resize hình, hoặc 🔄 Hình chụp xe đổi bối cảnh. Hệ thống sẽ tự động cập nhật câu prompt và tỷ lệ khung hình phù hợp.",
+      tip: "Bạn có thể bấm 'Đặt lại' để chọn nhu cầu khác bất kỳ lúc nào.",
     },
     {
       step: "03",

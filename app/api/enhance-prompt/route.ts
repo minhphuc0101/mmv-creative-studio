@@ -4,7 +4,7 @@ import { enhancePromptWithGemini } from "@/lib/gemini";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userPrompt, referenceImage } = body;
+    const { userPrompt, referenceImage, selectedUseCase } = body;
 
     if (!userPrompt || typeof userPrompt !== "string") {
       return NextResponse.json(
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await enhancePromptWithGemini(userPrompt, referenceImage);
+    const result = await enhancePromptWithGemini(userPrompt, referenceImage, selectedUseCase);
 
     return NextResponse.json({
       success: true,
