@@ -2,10 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Shield, Plus, Save, CheckCircle2, Car, Sparkles, Ban } from "lucide-react";
-import { BrandConfig, VehicleModel } from "@/lib/types";
+import { BrandConfig, UserSession, VehicleModel } from "@/lib/types";
+import { getStoredUser } from "@/lib/auth";
 
 export default function AdminBrandPage() {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
   const [activeTab, setActiveTab] = useState<"catalog" | "prompt" | "guardrails">("catalog");
   const [config, setConfig] = useState<BrandConfig | null>(null);
   const [catalog, setCatalog] = useState<VehicleModel[]>([]);
@@ -19,6 +23,18 @@ export default function AdminBrandPage() {
   const [newModelColors, setNewModelColors] = useState("");
 
   useEffect(() => {
+    const user = getStoredUser();
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if (user.role !== "admin") {
+      alert("Access Denied: Only HQ Marketing Admins have permission to manage brand guidelines.");
+      router.push("/");
+      return;
+    }
+    setCurrentUser(user);
+
     async function loadConfig() {
       try {
         const res = await fetch("/api/admin/brand");
@@ -32,7 +48,7 @@ export default function AdminBrandPage() {
       }
     }
     loadConfig();
-  }, []);
+  }, [router]);
 
   const handleSaveConfig = async () => {
     if (!config) return;
@@ -90,6 +106,15 @@ export default function AdminBrandPage() {
     }
   };
 
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center space-y-3">
+        <div className="w-8 h-8 rounded-full border-2 border-red-600 border-t-transparent animate-spin" />
+        <span className="text-xs font-semibold text-gray-500">Verifying Admin Access...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* Top Bar */}
@@ -125,7 +150,7 @@ export default function AdminBrandPage() {
         <div className="flex items-center space-x-2 border-b border-gray-200">
           <button
             onClick={() => setActiveTab("catalog")}
-            className={`pb-3 px-4 text-xs font-semibold flex items-center space-x-1.5 border-b-2 transition ${
+            className={`pb-3 px-4 text-xs font-semibold flex items-center space-x-1.5 border-b-2 transition cursor-pointer ${
               activeTab === "catalog"
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-800"
@@ -136,7 +161,7 @@ export default function AdminBrandPage() {
           </button>
           <button
             onClick={() => setActiveTab("prompt")}
-            className={`pb-3 px-4 text-xs font-semibold flex items-center space-x-1.5 border-b-2 transition ${
+            className={`pb-3 px-4 text-xs font-semibold flex items-center space-x-1.5 border-b-2 transition cursor-pointer ${
               activeTab === "prompt"
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-800"
@@ -147,7 +172,7 @@ export default function AdminBrandPage() {
           </button>
           <button
             onClick={() => setActiveTab("guardrails")}
-            className={`pb-3 px-4 text-xs font-semibold flex items-center space-x-1.5 border-b-2 transition ${
+            className={`pb-3 px-4 text-xs font-semibold flex items-center space-x-1.5 border-b-2 transition cursor-pointer ${
               activeTab === "guardrails"
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-800"
@@ -251,7 +276,7 @@ export default function AdminBrandPage() {
                 <div className="md:col-span-2">
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition cursor-pointer"
                   >
                     Add Model to Catalog
                   </button>
@@ -276,7 +301,7 @@ export default function AdminBrandPage() {
               <button
                 onClick={handleSaveConfig}
                 disabled={isSaving}
-                className="flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition"
+                className="flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>{isSaving ? "Publishing..." : "Publish Live"}</span>
@@ -308,7 +333,7 @@ export default function AdminBrandPage() {
               <button
                 onClick={handleSaveConfig}
                 disabled={isSaving}
-                className="flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition"
+                className="flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>{isSaving ? "Publishing..." : "Publish Live"}</span>

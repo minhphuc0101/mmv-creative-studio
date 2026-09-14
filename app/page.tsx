@@ -1,13 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { TopNav } from "@/components/TopNav";
 import { BriefPanel } from "@/components/BriefPanel";
 import { CanvasArea } from "@/components/CanvasArea";
 import { RecentDrawer } from "@/components/RecentDrawer";
 import { AspectRatio, GenerationAuditRecord, Resolution, UserSession, VehicleModel } from "@/lib/types";
+import { getStoredUser, MOCK_ACCOUNTS } from "@/lib/auth";
 
 export default function CreativeStudioPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<UserSession | null>(null);
+
   const [prompt, setPrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("1:1");
   const [resolution, setResolution] = useState<Resolution>("1K");
@@ -20,31 +25,18 @@ export default function CreativeStudioPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [catalog, setCatalog] = useState<VehicleModel[]>([]);
-  const [user, setUser] = useState<UserSession>({
-    id: "usr_phuctran_01",
-    name: "Phuc Tran",
-    email: "phuc.tran@mitsubishi-saigon.vn",
-    role: "admin",
-    dealership: {
-      id: "dealer_hcm_01",
-      name: "Mitsubishi Saigon Central",
-      code: "MMV-SGN-01",
-      monthly_budget_remaining: 850,
-    },
-    daily_credits_remaining: 14,
-    daily_limit: 20,
-  });
 
-  // Fetch initial user and vehicle catalog
+  // Check auth and fetch vehicle catalog
   useEffect(() => {
+    const stored = getStoredUser();
+    if (!stored) {
+      router.push("/login");
+      return;
+    }
+    setUser(stored);
+
     async function loadInitialData() {
       try {
-        const recentRes = await fetch("/api/recent");
-        if (recentRes.ok) {
-          const recentData = await recentRes.json();
-          if (recentData.user) setUser(recentData.user);
-        }
-
         const brandRes = await fetch("/api/admin/brand");
         if (brandRes.ok) {
           const brandData = await brandRes.json();
@@ -55,7 +47,7 @@ export default function CreativeStudioPage() {
       }
     }
     loadInitialData();
-  }, []);
+  }, [router]);
 
   // Handle Gemini Prompt Enhancement
   const handleEnhance = async () => {
@@ -109,11 +101,8 @@ export default function CreativeStudioPage() {
       setCurrentImage(data.imageUrl);
 
       // Update remaining credit balance
-      if (typeof data.remainingCredits === "number") {
-        setUser((prev) => ({
-          ...prev,
-          daily_credits_remaining: data.remainingCredits,
-        }));
+      if (typeof data.remainingCredits === "number" && user) {
+        setUser((prev) => (prev ? { ...prev, daily_credits_remaining: data.remainingCredits } : prev));
       }
     } catch (err: any) {
       setErrorMessage(err.message || "Failed to generate image with Nano Banana Pro 2");
@@ -143,6 +132,15 @@ export default function CreativeStudioPage() {
     setErrorMessage(null);
   };
 
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center space-y-3">
+        <div className="w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
+        <span className="text-xs font-semibold text-gray-500">Checking corporate authorization...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#F8FAFC]">
       {/* Top Header */}
@@ -158,7 +156,7 @@ export default function CreativeStudioPage() {
           <span>{errorMessage}</span>
           <button
             onClick={() => setErrorMessage(null)}
-            className="text-red-500 hover:text-red-700 font-semibold"
+            className="text-red-500 hover:text-red-700 font-semibold cursor-pointer"
           >
             Dismiss
           </button>

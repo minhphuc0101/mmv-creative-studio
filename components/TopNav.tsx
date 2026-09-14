@@ -2,8 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { ChevronDown, History, Sparkles, Shield, User, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, History, Sparkles, Shield, User, Zap, LogOut } from "lucide-react";
 import { UserSession } from "@/lib/types";
+import { clearStoredUser } from "@/lib/auth";
 
 interface TopNavProps {
   user: UserSession;
@@ -12,6 +14,19 @@ interface TopNavProps {
 }
 
 export const TopNav: React.FC<TopNavProps> = ({ user, onOpenRecent, onNewImage }) => {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    clearStoredUser();
+    router.push("/login");
+  };
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
   return (
     <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-6 sticky top-0 z-30">
       {/* Left branding */}
@@ -62,7 +77,7 @@ export const TopNav: React.FC<TopNavProps> = ({ user, onOpenRecent, onNewImage }
         {/* Show Recent */}
         <button
           onClick={onOpenRecent}
-          className="flex items-center space-x-1.5 text-xs font-medium text-gray-700 hover:text-gray-900 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition"
+          className="flex items-center space-x-1.5 text-xs font-medium text-gray-700 hover:text-gray-900 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition cursor-pointer"
         >
           <History className="w-4 h-4 text-gray-500" />
           <span>Show recent</span>
@@ -72,21 +87,28 @@ export const TopNav: React.FC<TopNavProps> = ({ user, onOpenRecent, onNewImage }
         {onNewImage && (
           <button
             onClick={onNewImage}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm transition"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm transition cursor-pointer"
           >
             New images
           </button>
         )}
 
-        {/* User profile */}
-        <div className="flex items-center space-x-2 pl-2 border-l border-gray-200">
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-xs border border-gray-300">
-            PT
+        {/* User profile & Logout */}
+        <div className="flex items-center space-x-3 pl-2 border-l border-gray-200">
+          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs border border-blue-200">
+            {getInitials(user.name)}
           </div>
           <div className="hidden sm:block text-left">
             <div className="text-xs font-semibold text-gray-900 leading-tight">{user.name}</div>
             <div className="text-[10px] text-gray-500 leading-tight">{user.dealership.name}</div>
           </div>
+          <button
+            onClick={handleLogout}
+            title="Log Out"
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-red-600 transition cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>
