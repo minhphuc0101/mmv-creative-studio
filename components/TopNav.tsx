@@ -11,10 +11,17 @@ interface TopNavProps {
   user: UserSession;
   onOpenRecent: () => void;
   onOpenGuide?: () => void;
+  onStartTour?: () => void;
   onNewImage?: () => void;
 }
 
-export const TopNav: React.FC<TopNavProps> = ({ user, onOpenRecent, onOpenGuide, onNewImage }) => {
+export const TopNav: React.FC<TopNavProps> = ({
+  user,
+  onOpenRecent,
+  onOpenGuide,
+  onStartTour,
+  onNewImage,
+}) => {
   const router = useRouter();
 
   const handleLogout = () => {
@@ -75,12 +82,24 @@ export const TopNav: React.FC<TopNavProps> = ({ user, onOpenRecent, onOpenGuide,
           </Link>
         )}
 
+        {/* Interactive Tour Button */}
+        {onStartTour && (
+          <button
+            onClick={onStartTour}
+            className="flex items-center space-x-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+            title="Bắt đầu tour hướng dẫn trực quan từng bước"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Tour 5 bước</span>
+          </button>
+        )}
+
         {/* User Guide */}
         {onOpenGuide && (
           <button
             onClick={onOpenGuide}
             className="flex items-center space-x-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
-            title="Xem hướng dẫn sử dụng nhanh"
+            title="Xem hướng dẫn sử dụng chi tiết"
           >
             <BookOpen className="w-3.5 h-3.5 text-blue-600" />
             <span>User Guide</span>

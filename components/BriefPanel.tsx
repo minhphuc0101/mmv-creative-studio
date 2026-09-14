@@ -141,7 +141,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
       />
 
       {/* Prompt Area */}
-      <div className="space-y-1.5">
+      <div id="tour-input-prompt" className="space-y-1.5 scroll-mt-24">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold text-gray-700">Prompt</label>
           <div className="flex items-center space-x-2">
@@ -165,6 +165,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
             </button>
             <span className="text-gray-300">|</span>
             <button
+              id="tour-enhance-btn"
               onClick={onEnhance}
               disabled={!prompt.trim() || isEnhancing || isGenerating}
               className="flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition cursor-pointer"
@@ -197,7 +198,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
       </div>
 
       {/* Nhu cầu tạo hình / Use Case Options for Prompt Refine */}
-      <div className="space-y-1.5 -mt-2">
+      <div id="tour-refine-prompt" className="space-y-1.5 -mt-2 scroll-mt-24">
         <div className="flex items-center justify-between text-[11px] font-semibold text-gray-600">
           <span>Nhu cầu tạo hình (Chọn để refine prompt):</span>
           {selectedUseCase && (
@@ -276,7 +277,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
       </div>
 
       {/* Input Image Reference (Upload) */}
-      <div className="space-y-2">
+      <div id="tour-upload-image" className="space-y-2 scroll-mt-24">
         <label className="block text-xs font-semibold text-gray-700">Input Image (MMV Reference)</label>
 
         {referenceImage ? (
@@ -352,6 +353,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
       {/* Generate Button */}
       <div className="pt-2">
         <button
+          id="tour-generate-btn"
           onClick={onGenerate}
           disabled={!prompt.trim() || isGenerating}
           className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed"

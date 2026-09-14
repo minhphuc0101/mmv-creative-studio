@@ -12,6 +12,7 @@ interface CanvasAreaProps {
   onSelectExample: (promptText: string) => void;
   onRefine?: (tweakText: string) => void;
   onOpenGuide?: () => void;
+  onStartTour?: () => void;
   onRegenerate: () => void;
   isGenerating: boolean;
 }
@@ -22,6 +23,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   aspectRatio,
   onSelectExample,
   onOpenGuide,
+  onStartTour,
   onRegenerate,
   isGenerating,
 }) => {
@@ -97,13 +99,25 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                onClick={onOpenGuide}
-                className="flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition flex items-center space-x-1 cursor-pointer"
-              >
-                <span>Xem hướng dẫn</span>
-                <span>→</span>
-              </button>
+              <div className="flex items-center space-x-2 flex-shrink-0">
+                {onStartTour && (
+                  <button
+                    onClick={onStartTour}
+                    className="text-xs font-semibold px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition flex items-center space-x-1.5 cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Bắt đầu Tour (5 bước)</span>
+                  </button>
+                )}
+                {onOpenGuide && (
+                  <button
+                    onClick={onOpenGuide}
+                    className="text-xs font-medium px-3 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 shadow-2xs transition cursor-pointer"
+                  >
+                    <span>Xem chi tiết</span>
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

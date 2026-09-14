@@ -19,11 +19,13 @@ import {
 interface UserGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onStartTour?: () => void;
 }
 
 export const UserGuideModal: React.FC<UserGuideModalProps> = ({
   isOpen,
   onClose,
+  onStartTour,
 }) => {
   // Close on Escape key
   useEffect(() => {
@@ -180,13 +182,27 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
             <Zap className="w-3.5 h-3.5 text-amber-600" />
             <span>Đã hiểu quy trình? Hãy bắt đầu tạo chiến dịch của bạn.</span>
           </div>
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition flex items-center space-x-1.5 cursor-pointer"
-          >
-            <span>Bắt đầu tạo ảnh</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center space-x-2">
+            {onStartTour && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onStartTour();
+                }}
+                className="px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200 transition flex items-center space-x-1.5 cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                <span>Tour tương tác (5 bước)</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition flex items-center space-x-1.5 cursor-pointer"
+            >
+              <span>Bắt đầu tạo ảnh</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

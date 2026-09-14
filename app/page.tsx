@@ -7,6 +7,7 @@ import { BriefPanel } from "@/components/BriefPanel";
 import { CanvasArea } from "@/components/CanvasArea";
 import { RecentDrawer } from "@/components/RecentDrawer";
 import { UserGuideModal } from "@/components/UserGuideModal";
+import { InteractiveTour } from "@/components/InteractiveTour";
 import { AspectRatio, GenerationAuditRecord, Resolution, UserSession, VehicleModel } from "@/lib/types";
 import { getStoredUser, MOCK_ACCOUNTS } from "@/lib/auth";
 
@@ -24,10 +25,31 @@ export default function CreativeStudioPage() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isRecentOpen, setIsRecentOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
   const [selectedUseCase, setSelectedUseCase] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [catalog, setCatalog] = useState<VehicleModel[]>([]);
+
+  // Auto-prompt interactive tour for first-time visitors
+  useEffect(() => {
+    try {
+      const hasCompleted = localStorage.getItem("mmv_tour_completed");
+      if (!hasCompleted) {
+        const timer = setTimeout(() => {
+          setIsTourOpen(true);
+        }, 800);
+        return () => clearTimeout(timer);
+      }
+    } catch {}
+  }, []);
+
+  const handleCloseTour = () => {
+    setIsTourOpen(false);
+    try {
+      localStorage.setItem("mmv_tour_completed", "true");
+    } catch {}
+  };
 
   // Check auth and fetch vehicle catalog
   useEffect(() => {
@@ -156,6 +178,7 @@ export default function CreativeStudioPage() {
         user={user}
         onOpenRecent={() => setIsRecentOpen(true)}
         onOpenGuide={() => setIsGuideOpen(true)}
+        onStartTour={() => setIsTourOpen(true)}
         onNewImage={handleNewImage}
       />
 
@@ -200,6 +223,7 @@ export default function CreativeStudioPage() {
           onSelectExample={(text) => setPrompt(text)}
           onRefine={handleRefine}
           onOpenGuide={() => setIsGuideOpen(true)}
+          onStartTour={() => setIsTourOpen(true)}
           onRegenerate={handleGenerate}
           isGenerating={isGenerating}
         />
@@ -216,6 +240,13 @@ export default function CreativeStudioPage() {
       <UserGuideModal
         isOpen={isGuideOpen}
         onClose={() => setIsGuideOpen(false)}
+        onStartTour={() => setIsTourOpen(true)}
+      />
+
+      {/* Interactive 5-Step Element Tour */}
+      <InteractiveTour
+        isOpen={isTourOpen}
+        onClose={handleCloseTour}
       />
     </div>
   );
