@@ -31,10 +31,13 @@ STRICT INSTRUCTIONS:
 1. LANGUAGE MATCHING: The output prompt MUST be in the EXACT SAME LANGUAGE as the sales consultant brief.
    - If the brief is in Vietnamese, write the entire enhanced prompt in vivid, natural, professional Vietnamese.
    - If the brief is in English, write in English.
-2. OUTPUT FORMAT: Output ONLY ONE single continuous paragraph of descriptive prompt text. Never output scene breakdowns, TV commercials, scripts, markdown headings, or conversational intros.
-3. VEHICLE: Feature an authentic Mitsubishi Motors vehicle (e.g. 2025 Mitsubishi Xforce, Mitsubishi Xpander Cross, All-New Triton). Emphasize the iconic Dynamic Shield front grille and T-shape LED headlights. If a reference photo of a car is attached, detect its model and color and preserve that vehicle. NEVER generate a competitor brand (No Mercedes, BMW, Toyota, Ford, Hyundai, Kia, Honda).
-4. ENVIRONMENT: Accurately capture the requested setting (e.g. "đèo đà lạt" = cung đường đèo uốn lượn tại Đà Lạt, rừng thông bạt ngàn trong sương sớm và ánh nắng ban mai; "showroom" = phòng trưng bày sang trọng hiện đại).
-5. QUALITY: 8k resolution, commercial car advertising photography, 50mm lens, raytraced reflections, realistic road motion blur.`,
+2. CONTEXT & SETTING IS TOP PRIORITY: You MUST fully capture and enrich the user's requested setting and mood (e.g. "đưa xe vào bối cảnh chạy lên đà lạt" -> xe đang mạnh mẽ leo dốc trên cung đường đèo quanh co uốn lượn tại Đà Lạt, hai bên là rừng thông bạt ngàn xanh mướt, sương sớm mờ ảo và ánh nắng ban mai rực rỡ xuyên qua tán lá).
+3. VEHICLE PRESERVATION: Emphasize authentic Mitsubishi styling (Dynamic Shield front grille, sharp T-shape LED lights).
+   - If a reference car photo is attached, identify its model and exact paint color and preserve that vehicle in the scene.
+   - If no vehicle model is specified by the user, default to 2025 Mitsubishi Xforce.
+   - STRICT COMPLIANCE: NEVER generate competitor brands (No Mercedes-Benz, BMW, Audi, Toyota, Hyundai, Kia, Ford, Honda).
+4. OUTPUT FORMAT: Output ONLY ONE single continuous paragraph of descriptive prompt text without markdown bullets, headings, conversational preamble, or scene breakdowns.
+5. PHOTOGRAPHY DETAILS: 8k resolution, cinematic automotive advertising photography, 50mm lens, raytraced reflections, realistic road motion blur.`,
         },
       ];
 
@@ -60,8 +63,11 @@ STRICT INSTRUCTIONS:
         ],
         generationConfig: {
           temperature: 0.4,
-          maxOutputTokens: 600,
-        },
+          maxOutputTokens: 2048,
+          thinkingConfig: {
+            thinkingBudget: 0,
+          },
+        } as any,
       });
 
       const latencyMs = Date.now() - startTime;
@@ -80,34 +86,59 @@ STRICT INSTRUCTIONS:
   // Fallback intelligent synthesizer using MMV brand rules and AID formula
   const latencyMs = Date.now() - startTime;
   let modelName = "Mitsubishi Xforce";
-  let color = "Energetic Yellow";
-  let scene = "outside a modern glass dealership showroom in Ho Chi Minh City";
+  let colorEn = "Energetic Yellow";
+  let colorVi = "Vàng Energetic rực rỡ";
+  let sceneEn = "outside a modern glass dealership showroom in Ho Chi Minh City";
+  let sceneVi = "bên ngoài showroom đại lý hiện đại bằng kính sang trọng tại TP. Hồ Chí Minh";
 
   const lower = userPrompt.toLowerCase();
   if (lower.includes("xpander")) {
     modelName = "Mitsubishi Xpander Cross";
-    color = "Green Bronze Metallic";
+    colorEn = "Green Bronze Metallic";
+    colorVi = "Xanh Đồng ánh kim";
   } else if (lower.includes("triton")) {
     modelName = "Mitsubishi All-New Triton";
-    color = "Yamabuki Orange";
+    colorEn = "Yamabuki Orange";
+    colorVi = "Cam Yamabuki thể thao";
   } else if (lower.includes("outlander")) {
     modelName = "Mitsubishi Outlander";
-    color = "Red Diamond";
+    colorEn = "Red Diamond";
+    colorVi = "Đỏ Red Diamond cao cấp";
   }
 
   if (lower.includes("đà lạt") || lower.includes("da lat") || lower.includes("đèo")) {
-    scene = "driving up a scenic winding mountain pass road toward Da Lat, Vietnam, surrounded by lush pine forests, morning mist, and golden sunbeams";
+    sceneEn = "driving up a scenic winding mountain pass road toward Da Lat, Vietnam, surrounded by lush pine forests, morning mist, and golden sunbeams";
+    sceneVi = "đang mạnh mẽ leo dốc trên cung đường đèo quanh co uốn lượn tại Đà Lạt, hai bên là rừng thông bạt ngàn xanh mướt, sương sớm mờ ảo và ánh nắng ban mai rực rỡ xuyên qua tán lá";
   } else if (lower.includes("biển") || lower.includes("coastal") || lower.includes("đà nẵng")) {
-    scene = "cruising along a scenic coastal highway in Da Nang, Vietnam with ocean waves and golden hour sunset reflections";
+    sceneEn = "cruising along a scenic coastal highway in Da Nang, Vietnam with ocean waves and golden hour sunset reflections";
+    sceneVi = "đang lướt đi trên cung đường ven biển tuyệt đẹp tại Đà Nẵng với sóng biển rì rào và ánh hoàng hôn vàng rực rỡ phản chiếu trên mặt đường";
   }
 
-  if (lower.includes("red") || lower.includes("đỏ")) color = "Red Diamond";
-  if (lower.includes("white") || lower.includes("trắng")) color = "White Diamond";
-  if (lower.includes("silver") || lower.includes("bạc")) color = "Blade Silver";
-  if (lower.includes("black") || lower.includes("đen")) color = "Jet Black";
-  if (lower.includes("xám") || lower.includes("gray") || lower.includes("xanh")) color = "Gray-Blue metallic";
+  if (lower.includes("red") || lower.includes("đỏ")) {
+    colorEn = "Red Diamond";
+    colorVi = "Đỏ Red Diamond";
+  }
+  if (lower.includes("white") || lower.includes("trắng")) {
+    colorEn = "White Diamond";
+    colorVi = "Trắng White Diamond";
+  }
+  if (lower.includes("silver") || lower.includes("bạc")) {
+    colorEn = "Blade Silver";
+    colorVi = "Bạc Blade Silver";
+  }
+  if (lower.includes("black") || lower.includes("đen")) {
+    colorEn = "Jet Black";
+    colorVi = "Đen Jet Black";
+  }
+  if (lower.includes("xám") || lower.includes("gray") || lower.includes("xanh")) {
+    colorEn = "Gray-Blue metallic";
+    colorVi = "Xám than ánh kim sang trọng";
+  }
 
-  const simulatedEnhanced = `Commercial 8k automotive advertisement shot of pristine 2025 ${modelName} in lustrous ${color}, showcasing the authentic Dynamic Shield front face design and razor-sharp T-shape LED headlights. ${scene}. Shot on Hasselblad H6D-100c, 50mm f/2.8 lens, cinematic color grading, hyperrealistic 8k resolution, award-winning automotive campaign.`;
+  const isVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(userPrompt);
+  const simulatedEnhanced = isVietnamese
+    ? `Ảnh quảng cáo thương mại 8k siêu thực của chiếc ${modelName} màu ${colorVi}, nổi bật với thiết kế lưới tản nhiệt Dynamic Shield đặc trưng và cụm đèn LED T-shape sắc nét, ${sceneVi}. Chụp bằng ống kính 50mm, ánh sáng điện ảnh, phản xạ tia sáng chân thực, hiệu ứng làm mờ chuyển động mượt mà của mặt đường.`
+    : `Commercial 8k automotive advertisement shot of pristine 2025 ${modelName} in lustrous ${colorEn}, showcasing the authentic Dynamic Shield front face design and razor-sharp T-shape LED headlights, ${sceneEn}. Shot on Hasselblad H6D-100c, 50mm f/2.8 lens, cinematic color grading, hyperrealistic 8k resolution, award-winning automotive campaign.`;
 
   return {
     enhancedPrompt: simulatedEnhanced,
