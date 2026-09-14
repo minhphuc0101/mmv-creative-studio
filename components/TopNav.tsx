@@ -61,19 +61,17 @@ export const TopNav: React.FC<TopNavProps> = ({
 
       {/* Right controls */}
       <div className="flex items-center space-x-4">
-        {/* Live Quota & Daily 200k VND Budget Badge */}
+        {/* Live Quota Badge (5 lượt tạo ảnh / ngày) */}
         <div 
           className="hidden md:flex items-center space-x-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 px-3 py-1.5 rounded-full text-xs font-medium text-amber-900 shadow-2xs"
-          title={`Hạn mức thử nghiệm: ${(user.daily_budget_vnd || 200000).toLocaleString("vi-VN")}₫/ngày (~250 lượt tạo ảnh). Đã dùng: ${(user.daily_spent_vnd || 0).toLocaleString("vi-VN")}₫.`}
+          title={`Hạn mức thử nghiệm: ${user.daily_limit} lượt tạo ảnh/ngày. Còn lại: ${user.daily_credits_remaining} lượt.`}
         >
           <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500 flex-shrink-0" />
-          <span>
-            <strong>{(user.daily_remaining_vnd !== undefined ? user.daily_remaining_vnd : 200000).toLocaleString("vi-VN")}₫</strong> / {(user.daily_budget_vnd || 200000).toLocaleString("vi-VN")}₫
+          <span className="font-semibold text-amber-950">
+            <strong>{user.daily_credits_remaining}</strong> / {user.daily_limit} lượt tạo/ngày
           </span>
           <span className="text-amber-300">|</span>
-          <span className="text-amber-800 font-semibold">
-            {user.daily_credits_remaining} / {user.daily_limit} lượt
-          </span>
+          <span className="text-amber-700 text-[11px]">Hạn mức đại lý</span>
         </div>
 
         {/* Admin Brand Settings Link */}

@@ -5,12 +5,11 @@ import { GenerationAuditRecord, UserSession } from "./types";
 const LOG_FILE = path.join(process.cwd(), ".audit_logs.json");
 const BUDGET_FILE = path.join(process.cwd(), ".daily_budget.json");
 
-// Daily spending cap for testing tool: 200,000 VND per day
-export const DAILY_BUDGET_VND = 200000;
+// Daily limit for testing tool: 5 generations per day
+export const DAILY_LIMIT_CREDITS = 5;
 // Cost per image generation (~$0.032 USD = ~800 VND)
 export const COST_PER_IMAGE_VND = 800;
-// Total generations permitted per day within 200,000 VND: 250 generations
-export const DAILY_LIMIT_CREDITS = Math.floor(DAILY_BUDGET_VND / COST_PER_IMAGE_VND);
+export const DAILY_BUDGET_VND = DAILY_LIMIT_CREDITS * COST_PER_IMAGE_VND;
 
 export interface DailyBudgetState {
   date: string; // YYYY-MM-DD
@@ -127,14 +126,14 @@ export function checkAndDeductQuota(creditsNeeded: number = 1): {
   const budget = readDailyBudget();
   const costVnd = creditsNeeded * COST_PER_IMAGE_VND;
 
-  if (budget.remaining_credits < creditsNeeded || budget.remaining_vnd < costVnd) {
+  if (budget.remaining_credits < creditsNeeded) {
     return {
       success: false,
       remaining: budget.remaining_credits,
       remainingVnd: budget.remaining_vnd,
       spentVnd: budget.spent_vnd,
       totalVnd: budget.daily_budget_vnd,
-      error: `Hạn mức thử nghiệm hôm nay (${budget.daily_budget_vnd.toLocaleString("vi-VN")}₫ / ngày) đã đạt giới hạn. Đã sử dụng ${budget.spent_vnd.toLocaleString("vi-VN")}₫ (~${budget.used_credits} lượt). Hệ thống sẽ tự động làm mới vào 00:00 ngày mai.`,
+      error: `Hạn mức thử nghiệm hôm nay (5 lượt tạo ảnh / ngày) đã đạt giới hạn. Đã sử dụng hết ${budget.used_credits} / 5 lượt. Hệ thống sẽ tự động làm mới vào 00:00 ngày mai.`,
     };
   }
 
