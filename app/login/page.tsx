@@ -8,7 +8,7 @@ import { UserSession } from "@/lib/types";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("phuc.tran@mitsubishi-saigon.vn");
+  const [email, setEmail] = useState("phuc.tran@testmmv.com");
   const [password, setPassword] = useState("••••••••••••");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -85,7 +85,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@dealership.com"
+                placeholder="name@testmmv.com"
                 className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
               />
             </div>

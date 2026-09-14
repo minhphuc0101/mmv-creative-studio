@@ -8,7 +8,7 @@ const LOG_FILE = path.join(process.cwd(), ".audit_logs.json");
 let mockUserSession: UserSession = {
   id: "usr_phuctran_01",
   name: "Phuc Tran",
-  email: "phuc.tran@mitsubishi-saigon.vn",
+  email: "phuc.tran@testmmv.com",
   role: "admin", // Admin role gives access to both Studio and Brand Governance
   dealership: {
     id: "dealer_hcm_01",

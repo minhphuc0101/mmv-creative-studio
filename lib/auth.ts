@@ -4,7 +4,7 @@ export const MOCK_ACCOUNTS: UserSession[] = [
   {
     id: "usr_phuctran_01",
     name: "Phuc Tran",
-    email: "phuc.tran@mitsubishi-saigon.vn",
+    email: "phuc.tran@testmmv.com",
     role: "sales_consultant",
     dealership: {
       id: "dealer_hcm_01",
@@ -18,7 +18,7 @@ export const MOCK_ACCOUNTS: UserSession[] = [
   {
     id: "usr_admin_01",
     name: "Minh Nguyen (HQ Admin)",
-    email: "minh.admin@mmv.com.vn",
+    email: "minh.admin@testmmv.com",
     role: "admin",
     dealership: {
       id: "dealer_hq_01",
@@ -32,7 +32,7 @@ export const MOCK_ACCOUNTS: UserSession[] = [
   {
     id: "usr_manager_01",
     name: "Hieu Le (Dealer Manager)",
-    email: "hieu.le@dealer-hanoi.vn",
+    email: "hieu.le@testmmv.com",
     role: "dealer_manager",
     dealership: {
       id: "dealer_han_02",
