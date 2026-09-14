@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { Download, RefreshCw, Sparkles, Layers, ShieldCheck } from "lucide-react";
+import { Download, RefreshCw, Sparkles, Layers, ShieldCheck, BookOpen } from "lucide-react";
 import { AspectRatio } from "@/lib/types";
 
 interface CanvasAreaProps {
@@ -11,6 +11,7 @@ interface CanvasAreaProps {
   aspectRatio: AspectRatio;
   onSelectExample: (promptText: string) => void;
   onRefine?: (tweakText: string) => void;
+  onOpenGuide?: () => void;
   onRegenerate: () => void;
   isGenerating: boolean;
 }
@@ -20,6 +21,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   prompt,
   aspectRatio,
   onSelectExample,
+  onOpenGuide,
   onRegenerate,
   isGenerating,
 }) => {
@@ -78,8 +80,35 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
             </p>
           </div>
 
+          {/* Welcoming Guide Callout for New Users */}
+          {onOpenGuide && (
+            <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/40 to-white border border-blue-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between text-left gap-3 shadow-2xs">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-gray-900 flex items-center space-x-1.5">
+                    <span>👋 Hướng dẫn dành cho Tư vấn bán hàng mới</span>
+                    <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">1 phút</span>
+                  </h3>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    5 bước tạo ảnh chiến dịch chuẩn nhận diện thương hiệu Mitsubishi Motors và tải ảnh chất lượng cao.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onOpenGuide}
+                className="flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition flex items-center space-x-1 cursor-pointer"
+              >
+                <span>Xem hướng dẫn</span>
+                <span>→</span>
+              </button>
+            </div>
+          )}
+
           {/* 3 Starter Example Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-left pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-left pt-1">
             {exampleCards.map((card, idx) => (
               <button
                 key={idx}

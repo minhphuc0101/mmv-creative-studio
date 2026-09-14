@@ -3,17 +3,18 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, History, Sparkles, Shield, User, Zap, LogOut } from "lucide-react";
+import { ChevronDown, History, Sparkles, Shield, User, Zap, LogOut, BookOpen } from "lucide-react";
 import { UserSession } from "@/lib/types";
 import { clearStoredUser } from "@/lib/auth";
 
 interface TopNavProps {
   user: UserSession;
   onOpenRecent: () => void;
+  onOpenGuide?: () => void;
   onNewImage?: () => void;
 }
 
-export const TopNav: React.FC<TopNavProps> = ({ user, onOpenRecent, onNewImage }) => {
+export const TopNav: React.FC<TopNavProps> = ({ user, onOpenRecent, onOpenGuide, onNewImage }) => {
   const router = useRouter();
 
   const handleLogout = () => {
@@ -72,6 +73,18 @@ export const TopNav: React.FC<TopNavProps> = ({ user, onOpenRecent, onNewImage }
             <Shield className="w-3.5 h-3.5 text-red-600" />
             <span>Brand Guidelines</span>
           </Link>
+        )}
+
+        {/* User Guide */}
+        {onOpenGuide && (
+          <button
+            onClick={onOpenGuide}
+            className="flex items-center space-x-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+            title="Xem hướng dẫn sử dụng nhanh"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+            <span>User Guide</span>
+          </button>
         )}
 
         {/* Show Recent */}

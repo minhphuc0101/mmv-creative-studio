@@ -6,6 +6,7 @@ import { TopNav } from "@/components/TopNav";
 import { BriefPanel } from "@/components/BriefPanel";
 import { CanvasArea } from "@/components/CanvasArea";
 import { RecentDrawer } from "@/components/RecentDrawer";
+import { UserGuideModal } from "@/components/UserGuideModal";
 import { AspectRatio, GenerationAuditRecord, Resolution, UserSession, VehicleModel } from "@/lib/types";
 import { getStoredUser, MOCK_ACCOUNTS } from "@/lib/auth";
 
@@ -22,6 +23,7 @@ export default function CreativeStudioPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isRecentOpen, setIsRecentOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [catalog, setCatalog] = useState<VehicleModel[]>([]);
@@ -152,6 +154,7 @@ export default function CreativeStudioPage() {
       <TopNav
         user={user}
         onOpenRecent={() => setIsRecentOpen(true)}
+        onOpenGuide={() => setIsGuideOpen(true)}
         onNewImage={handleNewImage}
       />
 
@@ -193,6 +196,7 @@ export default function CreativeStudioPage() {
           aspectRatio={aspectRatio}
           onSelectExample={(text) => setPrompt(text)}
           onRefine={handleRefine}
+          onOpenGuide={() => setIsGuideOpen(true)}
           onRegenerate={handleGenerate}
           isGenerating={isGenerating}
         />
@@ -203,6 +207,12 @@ export default function CreativeStudioPage() {
         isOpen={isRecentOpen}
         onClose={() => setIsRecentOpen(false)}
         onSelectRecord={handleSelectRecord}
+      />
+
+      {/* First-Time User Guide Modal */}
+      <UserGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
       />
     </div>
   );
