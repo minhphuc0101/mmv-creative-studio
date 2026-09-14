@@ -13,6 +13,9 @@ export interface UserSession {
   };
   daily_credits_remaining: number;
   daily_limit: number;
+  daily_budget_vnd?: number;
+  daily_spent_vnd?: number;
+  daily_remaining_vnd?: number;
 }
 
 export interface VehicleModel {

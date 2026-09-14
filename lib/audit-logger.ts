@@ -3,21 +3,85 @@ import path from "path";
 import { GenerationAuditRecord, UserSession } from "./types";
 
 const LOG_FILE = path.join(process.cwd(), ".audit_logs.json");
+const BUDGET_FILE = path.join(process.cwd(), ".daily_budget.json");
 
-// Default mock session for development (Phuc Tran - Dealer Sales Consultant)
+// Daily spending cap for testing tool: 200,000 VND per day
+export const DAILY_BUDGET_VND = 200000;
+// Cost per image generation (~$0.032 USD = ~800 VND)
+export const COST_PER_IMAGE_VND = 800;
+// Total generations permitted per day within 200,000 VND: 250 generations
+export const DAILY_LIMIT_CREDITS = Math.floor(DAILY_BUDGET_VND / COST_PER_IMAGE_VND);
+
+export interface DailyBudgetState {
+  date: string; // YYYY-MM-DD
+  daily_budget_vnd: number;
+  spent_vnd: number;
+  remaining_vnd: number;
+  cost_per_image_vnd: number;
+  daily_limit_credits: number;
+  remaining_credits: number;
+  used_credits: number;
+}
+
+function getTodayString(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+export function readDailyBudget(): DailyBudgetState {
+  const today = getTodayString();
+  const defaultState: DailyBudgetState = {
+    date: today,
+    daily_budget_vnd: DAILY_BUDGET_VND,
+    spent_vnd: 0,
+    remaining_vnd: DAILY_BUDGET_VND,
+    cost_per_image_vnd: COST_PER_IMAGE_VND,
+    daily_limit_credits: DAILY_LIMIT_CREDITS,
+    remaining_credits: DAILY_LIMIT_CREDITS,
+    used_credits: 0,
+  };
+
+  try {
+    if (fs.existsSync(BUDGET_FILE)) {
+      const data = fs.readFileSync(BUDGET_FILE, "utf-8");
+      const state: DailyBudgetState = JSON.parse(data);
+      if (state.date === today) {
+        return state;
+      }
+    }
+  } catch (err) {
+    console.error("Failed to read daily budget file:", err);
+  }
+
+  // New day or first run: initialize with 200,000 VND
+  writeDailyBudget(defaultState);
+  return defaultState;
+}
+
+export function writeDailyBudget(state: DailyBudgetState): void {
+  try {
+    fs.writeFileSync(BUDGET_FILE, JSON.stringify(state, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Failed to write daily budget file:", err);
+  }
+}
+
+// Default mock session for development
 let mockUserSession: UserSession = {
   id: "usr_phuctran_01",
   name: "Phuc Tran",
   email: "phuc.tran@testmmv.com",
-  role: "admin", // Admin role gives access to both Studio and Brand Governance
+  role: "admin",
   dealership: {
     id: "dealer_hcm_01",
     name: "Mitsubishi Saigon Central",
     code: "MMV-SGN-01",
-    monthly_budget_remaining: 850
+    monthly_budget_remaining: 5000,
   },
-  daily_credits_remaining: 14,
-  daily_limit: 20
+  daily_credits_remaining: DAILY_LIMIT_CREDITS,
+  daily_limit: DAILY_LIMIT_CREDITS,
+  daily_budget_vnd: DAILY_BUDGET_VND,
+  daily_spent_vnd: 0,
+  daily_remaining_vnd: DAILY_BUDGET_VND,
 };
 
 function readLogsFromFile(): GenerationAuditRecord[] {
@@ -41,33 +105,60 @@ function writeLogsToFile(logs: GenerationAuditRecord[]) {
 }
 
 export function getCurrentUserSession(): UserSession {
-  return mockUserSession;
+  const budget = readDailyBudget();
+  return {
+    ...mockUserSession,
+    daily_credits_remaining: budget.remaining_credits,
+    daily_limit: budget.daily_limit_credits,
+    daily_budget_vnd: budget.daily_budget_vnd,
+    daily_spent_vnd: budget.spent_vnd,
+    daily_remaining_vnd: budget.remaining_vnd,
+  };
 }
 
-export function checkAndDeductQuota(creditsNeeded: number = 1): { success: boolean; remaining: number; error?: string } {
-  if (mockUserSession.daily_credits_remaining < creditsNeeded) {
+export function checkAndDeductQuota(creditsNeeded: number = 1): {
+  success: boolean;
+  remaining: number;
+  remainingVnd: number;
+  spentVnd: number;
+  totalVnd: number;
+  error?: string;
+} {
+  const budget = readDailyBudget();
+  const costVnd = creditsNeeded * COST_PER_IMAGE_VND;
+
+  if (budget.remaining_credits < creditsNeeded || budget.remaining_vnd < costVnd) {
     return {
       success: false,
-      remaining: mockUserSession.daily_credits_remaining,
-      error: `Daily quota limit reached (${mockUserSession.daily_credits_remaining} credits left). Contact your Dealer Manager to request additional budget.`
+      remaining: budget.remaining_credits,
+      remainingVnd: budget.remaining_vnd,
+      spentVnd: budget.spent_vnd,
+      totalVnd: budget.daily_budget_vnd,
+      error: `Hạn mức thử nghiệm hôm nay (${budget.daily_budget_vnd.toLocaleString("vi-VN")}₫ / ngày) đã đạt giới hạn. Đã sử dụng ${budget.spent_vnd.toLocaleString("vi-VN")}₫ (~${budget.used_credits} lượt). Hệ thống sẽ tự động làm mới vào 00:00 ngày mai.`,
     };
   }
 
-  if (mockUserSession.dealership.monthly_budget_remaining < creditsNeeded) {
-    return {
-      success: false,
-      remaining: mockUserSession.daily_credits_remaining,
-      error: `Dealership branch monthly budget exhausted. Contact HQ Administrator.`
-    };
-  }
+  // Deduct
+  budget.spent_vnd += costVnd;
+  budget.remaining_vnd = Math.max(0, budget.daily_budget_vnd - budget.spent_vnd);
+  budget.used_credits += creditsNeeded;
+  budget.remaining_credits = Math.max(0, budget.daily_limit_credits - budget.used_credits);
 
-  // Atomic deduction
-  mockUserSession.daily_credits_remaining -= creditsNeeded;
-  mockUserSession.dealership.monthly_budget_remaining -= creditsNeeded;
+  writeDailyBudget(budget);
+
+  // Sync mock session
+  mockUserSession.daily_credits_remaining = budget.remaining_credits;
+  mockUserSession.daily_limit = budget.daily_limit_credits;
+  mockUserSession.daily_budget_vnd = budget.daily_budget_vnd;
+  mockUserSession.daily_spent_vnd = budget.spent_vnd;
+  mockUserSession.daily_remaining_vnd = budget.remaining_vnd;
 
   return {
     success: true,
-    remaining: mockUserSession.daily_credits_remaining
+    remaining: budget.remaining_credits,
+    remainingVnd: budget.remaining_vnd,
+    spentVnd: budget.spent_vnd,
+    totalVnd: budget.daily_budget_vnd,
   };
 }
 

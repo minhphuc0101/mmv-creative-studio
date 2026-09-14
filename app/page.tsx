@@ -62,10 +62,28 @@ export default function CreativeStudioPage() {
 
     async function loadInitialData() {
       try {
-        const brandRes = await fetch("/api/admin/brand");
+        const [brandRes, budgetRes] = await Promise.all([
+          fetch("/api/admin/brand"),
+          fetch("/api/budget"),
+        ]);
         if (brandRes.ok) {
           const brandData = await brandRes.json();
           if (brandData.catalog) setCatalog(brandData.catalog);
+        }
+        if (budgetRes.ok) {
+          const budgetData = await budgetRes.json();
+          setUser((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  daily_credits_remaining: budgetData.remaining_credits,
+                  daily_limit: budgetData.daily_limit_credits,
+                  daily_budget_vnd: budgetData.daily_budget_vnd,
+                  daily_spent_vnd: budgetData.spent_vnd,
+                  daily_remaining_vnd: budgetData.remaining_vnd,
+                }
+              : prev
+          );
         }
       } catch (err) {
         console.error("Failed to load initial data:", err);
@@ -125,8 +143,20 @@ export default function CreativeStudioPage() {
 
       setCurrentImage(data.imageUrl);
 
-      // Update remaining credit balance
-      if (typeof data.remainingCredits === "number" && user) {
+      // Update remaining credit & VND budget balance
+      if (data.dailyBudget && user) {
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                daily_credits_remaining: data.dailyBudget.remainingCredits,
+                daily_budget_vnd: data.dailyBudget.totalVnd,
+                daily_spent_vnd: data.dailyBudget.spentVnd,
+                daily_remaining_vnd: data.dailyBudget.remainingVnd,
+              }
+            : prev
+        );
+      } else if (typeof data.remainingCredits === "number" && user) {
         setUser((prev) => (prev ? { ...prev, daily_credits_remaining: data.remainingCredits } : prev));
       }
     } catch (err: any) {

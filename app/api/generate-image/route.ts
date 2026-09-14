@@ -91,6 +91,12 @@ export async function POST(req: NextRequest) {
       imageUrl: generationResult.imageUrl,
       enhancedPrompt: finalPrompt,
       remainingCredits: quotaResult.remaining,
+      dailyBudget: {
+        remainingCredits: quotaResult.remaining,
+        remainingVnd: quotaResult.remainingVnd,
+        spentVnd: quotaResult.spentVnd,
+        totalVnd: quotaResult.totalVnd,
+      },
       latencyMs: generationResult.latencyMs,
     });
   } catch (error: any) {
