@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { Download, RefreshCw, Sparkles, Layers, ShieldCheck, BookOpen } from "lucide-react";
+import { Download, RefreshCw, Sparkles, Layers, ShieldCheck, BookOpen, Maximize2, ZoomIn, X } from "lucide-react";
 import { AspectRatio } from "@/lib/types";
 
 interface CanvasAreaProps {
@@ -27,6 +27,9 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   onRegenerate,
   isGenerating,
 }) => {
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [fitMode, setFitMode] = useState<"cover" | "contain">("cover");
+
   const exampleCards = [
     {
       title: "Xforce Showroom Elegance",
@@ -53,6 +56,20 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
       case "1:1":
       default:
         return "aspect-square max-w-xl";
+    }
+  };
+
+  const getMaxWidthClass = (ratio: AspectRatio) => {
+    switch (ratio) {
+      case "16:9":
+        return "max-w-3xl";
+      case "9:16":
+        return "max-w-sm";
+      case "4:3":
+        return "max-w-2xl";
+      case "1:1":
+      default:
+        return "max-w-xl";
     }
   };
 
@@ -144,9 +161,14 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
         <div className="w-full flex flex-col items-center justify-center space-y-5 my-auto">
           {/* Active Generation Image Card */}
           <div
+            onClick={() => {
+              if (currentImage && !isGenerating) setIsLightboxOpen(true);
+            }}
             className={`relative w-full ${getAspectClass(
               aspectRatio
-            )} rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-gray-900 group`}
+            )} rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-gray-900 group ${
+              currentImage && !isGenerating ? "cursor-pointer" : ""
+            }`}
           >
             {isGenerating ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/90 text-white space-y-3 p-6 text-center">
@@ -164,11 +186,21 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                   <img
                     src={currentImage}
                     alt="Generated MMV Marketing Visual"
-                    className="w-full h-full object-cover"
+                    className={`w-full h-full transition-all duration-200 ${
+                      fitMode === "contain" ? "object-contain bg-black/90" : "object-cover"
+                    }`}
                   />
 
+                  {/* Click to zoom hover hint */}
+                  <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    <span className="bg-black/75 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center space-x-1.5 backdrop-blur-xs shadow-lg">
+                      <ZoomIn className="w-3.5 h-3.5" />
+                      <span>Bấm để phóng to xem trọn vẹn</span>
+                    </span>
+                  </div>
+
                   {/* MMV Brand Overlay Banner (Logo & Clearspace compliance) */}
-                  <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center space-x-2 border border-white/20">
+                  <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center space-x-2 border border-white/20 pointer-events-none">
                     <div className="w-4 h-4 rounded-full bg-red-600 flex items-center justify-center font-bold text-[9px] text-white">
                       ◆
                     </div>
@@ -178,7 +210,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                   </div>
 
                   {/* Dealer watermark badge */}
-                  <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1 rounded-md text-[10px] text-white/90 border border-white/10 font-medium">
+                  <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1 rounded-md text-[10px] text-white/90 border border-white/10 font-medium pointer-events-none">
                     Drive your Ambition | Saigon Central
                   </div>
                 </>
@@ -188,26 +220,90 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
           {/* Post-generation Toolbar */}
           {!isGenerating && currentImage && (
-            <div className="flex items-center justify-end space-x-2 w-full max-w-xl">
-              <button
-                onClick={onRegenerate}
-                className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-gray-500" />
-                <span>Re-roll</span>
-              </button>
-              <a
-                href={currentImage}
-                download="MMV_Marketing_Campaign.jpg"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center space-x-1.5 text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download High-Res</span>
-              </a>
+            <div className={`flex flex-wrap items-center justify-between gap-2 w-full ${getMaxWidthClass(aspectRatio)}`}>
+              <div className="flex items-center space-x-1.5">
+                <button
+                  type="button"
+                  onClick={() => setFitMode(fitMode === "cover" ? "contain" : "cover")}
+                  className="flex items-center space-x-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition cursor-pointer shadow-2xs"
+                  title={fitMode === "cover" ? "Chuyển sang chế độ Fit (hiển thị trọn vẹn 100% không cắt viền)" : "Chuyển sang chế độ Fill (lấp đầy khung)"}
+                >
+                  <Maximize2 className="w-3.5 h-3.5 text-gray-500" />
+                  <span>{fitMode === "cover" ? "Fit (Không cắt viền)" : "Fill (Lấp đầy)"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsLightboxOpen(true)}
+                  className="flex items-center space-x-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition cursor-pointer shadow-2xs"
+                  title="Mở ảnh gốc trong cửa sổ lớn"
+                >
+                  <ZoomIn className="w-3.5 h-3.5 text-gray-500" />
+                  <span>Phóng to</span>
+                </button>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={onRegenerate}
+                  className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition cursor-pointer shadow-2xs"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-gray-500" />
+                  <span>Re-roll</span>
+                </button>
+                <a
+                  href={currentImage}
+                  download="MMV_Marketing_Campaign.jpg"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center space-x-1.5 text-xs font-semibold px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download High-Res</span>
+                </a>
+              </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Fullscreen Lightbox Modal */}
+      {isLightboxOpen && currentImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          <div className="absolute top-4 right-4 flex items-center space-x-3 z-50">
+            <a
+              href={currentImage}
+              download="MMV_Marketing_Campaign.jpg"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center space-x-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Tải ảnh gốc</span>
+            </a>
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
+              title="Đóng (Esc)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div
+            className="max-w-5xl max-h-[88vh] relative flex items-center justify-center rounded-xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={currentImage}
+              alt="Full Resolution View"
+              className="max-w-full max-h-[85vh] object-contain rounded-xl"
+            />
+          </div>
+          <p className="text-white/60 text-xs mt-3">
+            Bấm bất kỳ đâu ngoài ảnh hoặc nút ✕ để đóng
+          </p>
         </div>
       )}
     </main>

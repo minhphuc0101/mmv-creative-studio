@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     let geminiLatency = 0;
 
     try {
-      const enhanced = await enhancePromptWithGemini(prompt, referenceImage);
+      const enhanced = await enhancePromptWithGemini(prompt, referenceImage, undefined, aspectRatio);
       if (enhanced && enhanced.enhancedPrompt) {
         finalPrompt = enhanced.enhancedPrompt;
         geminiTokens = enhanced.tokens;

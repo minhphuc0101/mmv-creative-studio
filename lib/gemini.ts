@@ -4,7 +4,8 @@ import { getActiveBrandConfig } from "./brand-rules";
 export async function enhancePromptWithGemini(
   userPrompt: string,
   referenceImage?: string,
-  selectedUseCase?: string
+  selectedUseCase?: string,
+  aspectRatio?: string
 ): Promise<{
   enhancedPrompt: string;
   tokens: { prompt: number; completion: number };
@@ -25,7 +26,7 @@ export async function enhancePromptWithGemini(
 
       let useCaseContext = "";
       if (selectedUseCase) {
-        useCaseContext = `\n6. SPECIALIZED MARKETING USE-CASE: "${selectedUseCase}".
+        useCaseContext = `\n7. SPECIALIZED MARKETING USE-CASE: "${selectedUseCase}".
 Please tailor the prompt specifically according to this intent:
 - 'Hình ads': Focus on dramatic commercial vehicle hero shot, pristine lighting, crisp reflections, dynamic advertising appeal.
 - 'Hình Banner theo size của AI': Wide panoramic composition, vehicle framed to one side with balanced negative space on the other side for promotional text and headlines.
@@ -48,8 +49,13 @@ STRICT INSTRUCTIONS:
    - If a reference car photo is attached, identify its model and exact paint color and preserve that vehicle in the scene.
    - If no vehicle model is specified by the user, default to 2025 Mitsubishi Xforce.
    - STRICT COMPLIANCE: NEVER generate competitor brands (No Mercedes-Benz, BMW, Audi, Toyota, Hyundai, Kia, Ford, Honda).
-4. OUTPUT FORMAT: Output ONLY ONE single continuous paragraph of descriptive prompt text without markdown bullets, headings, conversational preamble, or scene breakdowns.
-5. PHOTOGRAPHY DETAILS: 8k resolution, cinematic automotive advertising photography, 50mm lens, raytraced reflections, realistic road motion blur.${useCaseContext}`,
+4. VEHICLE FRAMING & COMPOSITION (CRITICAL - DO NOT CROP THE CAR):
+   - WIDE-ANGLE COMMERCIAL SHOT: Use a wide automotive perspective (24mm - 28mm lens) with the ENTIRE vehicle 100% visible from front bumper to rear bumper (thấy trọn vẹn toàn bộ thân xe từ cản trước đến cản sau, đầy đủ 4 bánh xe, tuyệt đối không bị cắt xén bất kỳ góc cạnh nào).
+   - AMPLE BREATHING ROOM: Ensure generous negative space and environmental margins around all sides of the vehicle. The vehicle must NEVER be cut off, cropped, or clipped by the frame edges.
+   - Avoid tight close-ups, extreme telephoto zooms, or cutoffs that chop off the front/rear of the car.
+   - Target image aspect ratio is: ${aspectRatio || "1:1"}.
+5. OUTPUT FORMAT: Output ONLY ONE single continuous paragraph of descriptive prompt text without markdown bullets, headings, conversational preamble, or scene breakdowns.
+6. PHOTOGRAPHY DETAILS: 8k resolution, cinematic automotive advertising photography, 28mm wide-angle lens, raytraced reflections, realistic road motion blur.${useCaseContext}`,
         },
       ];
 
@@ -149,8 +155,8 @@ STRICT INSTRUCTIONS:
 
   const isVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(userPrompt);
   const simulatedEnhanced = isVietnamese
-    ? `Ảnh quảng cáo thương mại 8k siêu thực của chiếc ${modelName} màu ${colorVi}, nổi bật với thiết kế lưới tản nhiệt Dynamic Shield đặc trưng và cụm đèn LED T-shape sắc nét, ${sceneVi}. Chụp bằng ống kính 50mm, ánh sáng điện ảnh, phản xạ tia sáng chân thực, hiệu ứng làm mờ chuyển động mượt mà của mặt đường.`
-    : `Commercial 8k automotive advertisement shot of pristine 2025 ${modelName} in lustrous ${colorEn}, showcasing the authentic Dynamic Shield front face design and razor-sharp T-shape LED headlights, ${sceneEn}. Shot on Hasselblad H6D-100c, 50mm f/2.8 lens, cinematic color grading, hyperrealistic 8k resolution, award-winning automotive campaign.`;
+    ? `Ảnh quảng cáo thương mại 8k siêu thực, góc chụp toàn cảnh rộng 28mm thấy trọn vẹn toàn bộ thân xe từ đầu đến đuôi xe chiếc ${modelName} màu ${colorVi}, nổi bật với thiết kế lưới tản nhiệt Dynamic Shield đặc trưng và cụm đèn LED T-shape sắc nét, không bị cắt xén bất kỳ chi tiết nào, ${sceneVi}. Ánh sáng điện ảnh cao cấp, phản xạ tia sáng raytraced chân thực, hiệu ứng làm mờ chuyển động mượt mà của mặt đường.`
+    : `Commercial 8k automotive advertisement shot, wide-angle 28mm perspective showing the entire pristine 2025 ${modelName} in lustrous ${colorEn} from bumper to bumper without cropping, showcasing the authentic Dynamic Shield front face design and razor-sharp T-shape LED headlights, ${sceneEn}. Cinematic automotive advertising lighting, raytraced reflections, award-winning automotive campaign.`;
 
   return {
     enhancedPrompt: simulatedEnhanced,
