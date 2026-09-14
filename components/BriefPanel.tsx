@@ -18,7 +18,7 @@ interface BriefPanelProps {
   onRefine: (tweakText: string) => void;
   isGenerating: boolean;
   isEnhancing: boolean;
-  catalog: VehicleModel[];
+  catalog?: VehicleModel[];
 }
 
 export const BriefPanel: React.FC<BriefPanelProps> = ({
@@ -37,7 +37,6 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
   isEnhancing,
   catalog,
 }) => {
-  const [showCatalogPicker, setShowCatalogPicker] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -197,44 +196,11 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
         </select>
       </div>
 
-      {/* Input Image Reference (Fully Working File Upload & Catalog Picker) */}
+      {/* Input Image Reference (Upload) */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold text-gray-700">Input Image (MMV Reference)</label>
-          <button
-            type="button"
-            onClick={() => setShowCatalogPicker(!showCatalogPicker)}
-            className="text-[11px] font-medium text-blue-600 hover:underline cursor-pointer"
-          >
-            {showCatalogPicker ? "Custom upload" : "Select MMV model"}
-          </button>
-        </div>
+        <label className="block text-xs font-semibold text-gray-700">Input Image (MMV Reference)</label>
 
-        {showCatalogPicker ? (
-          <div className="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 text-xs">
-            <div className="font-medium text-gray-700 mb-1">Pick Official Model Reference:</div>
-            <div className="space-y-1.5">
-              {catalog.map((car) => (
-                <button
-                  key={car.id}
-                  type="button"
-                  onClick={() => {
-                    setReferenceImage(car.reference_image || car.name);
-                    setPrompt(
-                      prompt ||
-                        `Commercial shot of pristine ${car.name} in signature finish at modern dealership showroom.`
-                    );
-                    setShowCatalogPicker(false);
-                  }}
-                  className="w-full text-left p-2 rounded bg-white hover:bg-blue-50 border border-gray-200 text-gray-800 font-medium flex items-center justify-between cursor-pointer"
-                >
-                  <span>{car.name}</span>
-                  <span className="text-[10px] text-gray-500">{car.segment}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : referenceImage ? (
+        {referenceImage ? (
           /* Active Selected / Uploaded Image View */
           <div className="relative border border-gray-200 rounded-xl p-3 bg-gray-50 flex items-center space-x-3">
             {referenceImage.startsWith("data:") || referenceImage.startsWith("http") ? (
