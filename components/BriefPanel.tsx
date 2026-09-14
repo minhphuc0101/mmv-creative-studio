@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Sparkles, Upload, Car, Loader2, AlertCircle } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Sparkles, Upload, Car, Loader2, X, Image as ImageIcon } from "lucide-react";
 import { AspectRatio, Resolution, VehicleModel } from "@/lib/types";
 
 interface BriefPanelProps {
@@ -36,6 +36,37 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
   catalog,
 }) => {
   const [showCatalogPicker, setShowCatalogPicker] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const processFile = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload a valid image file (PNG, JPG, JPEG, or WEBP).");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setReferenceImage(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
 
   return (
     <aside className="w-80 lg:w-96 border-r border-gray-200 bg-white flex flex-col h-[calc(100vh-4rem)] overflow-y-auto p-5 space-y-5 flex-shrink-0">
@@ -44,6 +75,15 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
         <span className="text-xs text-gray-500 font-medium">MMV Studio</span>
       </div>
 
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/png,image/jpeg,image/jpg,image/webp"
+        className="hidden"
+      />
+
       {/* Prompt Area */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
@@ -51,7 +91,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
           <button
             onClick={onEnhance}
             disabled={!prompt.trim() || isEnhancing || isGenerating}
-            className="flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition"
+            className="flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition cursor-pointer"
             title="Auto-enhance prompt with MMV Brand Guidelines using Gemini"
           >
             {isEnhancing ? (
@@ -92,7 +132,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
         <select
           value={aspectRatio}
           onChange={(e) => setAspectRatio(e.target.value as AspectRatio)}
-          className="w-full text-xs py-2 px-3 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+          className="w-full text-xs py-2 px-3 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
         >
           <option value="1:1">Square (1:1) - Social Posts</option>
           <option value="16:9">Landscape (16:9) - Banners & Display</option>
@@ -107,21 +147,21 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
         <select
           value={resolution}
           onChange={(e) => setResolution(e.target.value as Resolution)}
-          className="w-full text-xs py-2 px-3 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+          className="w-full text-xs py-2 px-3 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
         >
           <option value="1K">1K - Standard Social Preview</option>
           <option value="2K">2K - High-Definition Commercial</option>
         </select>
       </div>
 
-      {/* Input Image Reference */}
+      {/* Input Image Reference (Fully Working File Upload & Catalog Picker) */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold text-gray-700">Input Image (MMV Reference)</label>
           <button
             type="button"
             onClick={() => setShowCatalogPicker(!showCatalogPicker)}
-            className="text-[11px] font-medium text-blue-600 hover:underline"
+            className="text-[11px] font-medium text-blue-600 hover:underline cursor-pointer"
           >
             {showCatalogPicker ? "Custom upload" : "Select MMV model"}
           </button>
@@ -143,7 +183,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
                     );
                     setShowCatalogPicker(false);
                   }}
-                  className="w-full text-left p-2 rounded bg-white hover:bg-blue-50 border border-gray-200 text-gray-800 font-medium flex items-center justify-between"
+                  className="w-full text-left p-2 rounded bg-white hover:bg-blue-50 border border-gray-200 text-gray-800 font-medium flex items-center justify-between cursor-pointer"
                 >
                   <span>{car.name}</span>
                   <span className="text-[10px] text-gray-500">{car.segment}</span>
@@ -151,34 +191,72 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
               ))}
             </div>
           </div>
-        ) : (
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-5 text-center hover:border-blue-400 transition bg-gray-50/50 cursor-pointer">
-            {referenceImage ? (
-              <div className="space-y-2">
-                <div className="text-xs font-semibold text-green-700 flex items-center justify-center space-x-1">
-                  <Car className="w-3.5 h-3.5" />
-                  <span>Reference Selected</span>
-                </div>
-                <div className="text-[11px] text-gray-600 truncate max-w-[200px] mx-auto">
-                  {referenceImage}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setReferenceImage("")}
-                  className="text-[10px] text-red-600 hover:underline"
-                >
-                  Remove reference
-                </button>
-              </div>
+        ) : referenceImage ? (
+          /* Active Selected / Uploaded Image View */
+          <div className="relative border border-gray-200 rounded-xl p-3 bg-gray-50 flex items-center space-x-3">
+            {referenceImage.startsWith("data:") || referenceImage.startsWith("http") ? (
+              <img
+                src={referenceImage}
+                alt="Reference Thumbnail"
+                className="w-14 h-14 rounded-lg object-cover border border-gray-300 shadow-2xs flex-shrink-0"
+              />
             ) : (
-              <div className="space-y-1">
-                <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                <div className="text-xs font-medium text-gray-700">
-                  <span className="text-blue-600 hover:underline">Choose files</span> or drag them here
-                </div>
-                <p className="text-[10px] text-gray-400">Accepted formats: png, jpg, jpeg, webp</p>
+              <div className="w-14 h-14 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 font-semibold text-xs flex-shrink-0">
+                <Car className="w-6 h-6" />
               </div>
             )}
+
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-semibold text-green-700 flex items-center space-x-1">
+                <Car className="w-3.5 h-3.5" />
+                <span>Reference Loaded</span>
+              </div>
+              <p className="text-[11px] text-gray-500 truncate mt-0.5">
+                {referenceImage.startsWith("data:") ? "Custom photo uploaded" : referenceImage}
+              </p>
+              <div className="flex items-center space-x-3 mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-[11px] font-medium text-blue-600 hover:underline cursor-pointer"
+                >
+                  Change photo
+                </button>
+                <span className="text-gray-300">|</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReferenceImage("");
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="text-[11px] font-medium text-red-600 hover:underline cursor-pointer"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Clickable Dropzone */
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer ${
+              isDragging
+                ? "border-blue-500 bg-blue-50/50"
+                : "border-gray-300 hover:border-blue-400 bg-gray-50/50 hover:bg-blue-50/20"
+            }`}
+          >
+            <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+            <div className="text-xs font-medium text-gray-700">
+              <span className="text-blue-600 font-semibold hover:underline">Choose files</span> or drag them here
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1">Accepted formats: png, jpg, jpeg, webp</p>
           </div>
         )}
       </div>
@@ -188,7 +266,7 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
         <button
           onClick={onGenerate}
           disabled={!prompt.trim() || isGenerating}
-          className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center justify-center space-x-2"
+          className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed"
         >
           {isGenerating ? (
             <>
