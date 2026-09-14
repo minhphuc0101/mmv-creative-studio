@@ -1,18 +1,18 @@
 import { AspectRatio, Resolution } from "./types";
 
-const MMV_SHOWCASE_ASSETS: Record<string, string[]> = {
+// Real, authentic Mitsubishi Motors Vietnam vehicle assets ONLY.
+// Zero competitor vehicles, zero foreign car links.
+const MMV_OFFICIAL_ASSETS: Record<string, string[]> = {
   xforce: [
-    "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1400&q=85",
-    "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1400&q=85",
-    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85",
+    "/cars/xforce_blue_gray.jpg",
+    "/cars/xforce_white.jpg",
   ],
   xpander: [
-    "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=85",
-    "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1400&q=85",
+    "/cars/xforce_blue_gray.jpg",
+    "/cars/xforce_white.jpg",
   ],
   triton: [
-    "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1400&q=85",
-    "https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1400&q=85",
+    "/cars/xforce_blue_gray.jpg",
   ],
 };
 
@@ -31,7 +31,45 @@ export async function generateWithNanoBananaPro2(params: {
   const nanoBananaUrl = process.env.NANO_BANANA_API_URL;
   const nanoBananaKey = process.env.NANO_BANANA_API_KEY;
 
-  // Option 3: Primary Real Generation via Google Imagen 3 using GEMINI_API_KEY
+  // 1. Direct Nano Banana endpoint if custom server URL & Key configured
+  if (nanoBananaUrl && nanoBananaKey && nanoBananaKey !== "your_nano_banana_api_key_here") {
+    try {
+      const response = await fetch(nanoBananaUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${nanoBananaKey}`,
+        },
+        body: JSON.stringify({
+          model: "nano-banana-pro-2",
+          prompt: params.prompt,
+          aspect_ratio: params.aspectRatio,
+          resolution: params.resolution,
+          reference_image: params.referenceImage,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const outputUrl = data.image_url || data.output?.[0];
+        if (outputUrl) {
+          return {
+            imageUrl: outputUrl,
+            latencyMs: Date.now() - startTime,
+            seed: data.seed || Math.floor(Math.random() * 1000000),
+          };
+        }
+      } else {
+        const errText = await response.text();
+        throw new Error(`Nano Banana API responded with status ${response.status}: ${errText}`);
+      }
+    } catch (err: any) {
+      console.error("Nano Banana API call failed:", err);
+      throw err;
+    }
+  }
+
+  // 2. Google Imagen 3 via GEMINI_API_KEY
   if (geminiKey && geminiKey !== "your_gemini_api_key_here") {
     try {
       const response = await fetch(
@@ -72,55 +110,30 @@ export async function generateWithNanoBananaPro2(params: {
         }
       } else {
         const errorText = await response.text();
-        console.warn("Imagen 3 API responded with status", response.status, errorText);
+        let parsedMessage = errorText;
+        try {
+          const parsed = JSON.parse(errorText);
+          parsedMessage = parsed.error?.message || errorText;
+        } catch {}
+        console.error("Google Imagen 3 API error:", response.status, parsedMessage);
+        throw new Error(`Google Imagen 3 API Error (${response.status}): ${parsedMessage}`);
       }
-    } catch (err) {
-      console.warn("Imagen 3 generation call failed:", err);
+    } catch (err: any) {
+      console.error("Image generation failed:", err);
+      throw err;
     }
   }
 
-  // Method B: Direct Nano Banana endpoint if configured
-  if (nanoBananaUrl && nanoBananaKey && nanoBananaKey !== "your_nano_banana_api_key_here") {
-    try {
-      const response = await fetch(nanoBananaUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${nanoBananaKey}`,
-        },
-        body: JSON.stringify({
-          model: "nano-banana-pro-2",
-          prompt: params.prompt,
-          aspect_ratio: params.aspectRatio,
-          resolution: params.resolution,
-          reference_image: params.referenceImage,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          imageUrl: data.image_url || data.output?.[0],
-          latencyMs: Date.now() - startTime,
-          seed: data.seed || Math.floor(Math.random() * 1000000),
-        };
-      }
-    } catch (err) {
-      console.warn("Nano Banana API call failed:", err);
-    }
+  // 3. If GEMINI_API_KEY is not configured at all
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+    throw new Error(
+      "GEMINI_API_KEY is not configured in Vercel. Please add your GEMINI_API_KEY in Vercel Settings > Environment Variables, then redeploy."
+    );
   }
 
-  // Fallback showcase asset for instant demo/offline testing
-  await new Promise((resolve) => setTimeout(resolve, 1200));
-
-  const lower = params.prompt.toLowerCase();
-  let pool = MMV_SHOWCASE_ASSETS.xforce;
-  if (lower.includes("xpander")) {
-    pool = MMV_SHOWCASE_ASSETS.xpander;
-  } else if (lower.includes("triton")) {
-    pool = MMV_SHOWCASE_ASSETS.triton;
-  }
-
+  // 4. Local Development Fallback (Only authentic MMV cars from public/cars)
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const pool = MMV_OFFICIAL_ASSETS.xforce;
   const selectedImage = pool[Math.floor(Math.random() * pool.length)];
 
   return {

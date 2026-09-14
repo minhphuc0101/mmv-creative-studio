@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAndDeductQuota, getCurrentUserSession, recordAuditLog } from "@/lib/audit-logger";
 import { generateWithNanoBananaPro2 } from "@/lib/nano-banana";
+import { enhancePromptWithGemini } from "@/lib/gemini";
 import { GenerationAuditRecord } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
@@ -24,9 +25,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Call Nano Banana Pro 2
+    // 2. Automatically translate & enhance prompt with Gemini to strictly follow MMV brand rules and context
+    let finalPrompt = prompt;
+    let geminiTokens = { prompt: 150, completion: 80 };
+    let geminiLatency = 0;
+
+    try {
+      const enhanced = await enhancePromptWithGemini(prompt, referenceImage);
+      if (enhanced && enhanced.enhancedPrompt) {
+        finalPrompt = enhanced.enhancedPrompt;
+        geminiTokens = enhanced.tokens;
+        geminiLatency = enhanced.latencyMs;
+      }
+    } catch (enhanceErr) {
+      console.warn("Auto-enhancement warning:", enhanceErr);
+    }
+
+    // 3. Call Image Generation Engine (Imagen 3 / Nano Banana Pro 2)
     const generationResult = await generateWithNanoBananaPro2({
-      prompt,
+      prompt: finalPrompt,
       aspectRatio,
       resolution,
       referenceImage,
@@ -35,7 +52,7 @@ export async function POST(req: NextRequest) {
     const user = getCurrentUserSession();
     const jobId = `gen_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
-    // 3. Record Audit Log
+    // 4. Record Audit Log
     const auditRecord: GenerationAuditRecord = {
       job_id: jobId,
       timestamp: new Date().toISOString(),
@@ -52,10 +69,10 @@ export async function POST(req: NextRequest) {
         has_reference_image: !!referenceImage,
       },
       gemini_enhancement: {
-        enhanced_prompt: prompt,
-        prompt_tokens: 180,
-        completion_tokens: 90,
-        latency_ms: 500,
+        enhanced_prompt: finalPrompt,
+        prompt_tokens: geminiTokens.prompt,
+        completion_tokens: geminiTokens.completion,
+        latency_ms: geminiLatency,
       },
       generation: {
         model: "Nano Banana Pro 2",
@@ -72,10 +89,12 @@ export async function POST(req: NextRequest) {
       success: true,
       jobId,
       imageUrl: generationResult.imageUrl,
+      enhancedPrompt: finalPrompt,
       remainingCredits: quotaResult.remaining,
       latencyMs: generationResult.latencyMs,
     });
   } catch (error: any) {
+    console.error("API /api/generate-image error:", error);
     return NextResponse.json(
       { error: error.message || "Image generation failed" },
       { status: 500 }

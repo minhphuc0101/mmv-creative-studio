@@ -59,7 +59,7 @@ export default function CreativeStudioPage() {
       const res = await fetch("/api/enhance-prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userPrompt: prompt }),
+        body: JSON.stringify({ userPrompt: prompt, referenceImage }),
       });
 
       const data = await res.json();
