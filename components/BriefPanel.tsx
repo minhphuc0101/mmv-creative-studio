@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { Sparkles, Upload, Car, Loader2, X, Image as ImageIcon } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Sparkles, Upload, Car, Loader2, X, Image as ImageIcon, Maximize2, Minimize2 } from "lucide-react";
 import { AspectRatio, Resolution, VehicleModel } from "@/lib/types";
 
 interface BriefPanelProps {
@@ -38,7 +38,15 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
   catalog,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-expand prompt textarea if prompt becomes detailed
+  useEffect(() => {
+    if (prompt.length > 140) {
+      setIsExpanded(true);
+    }
+  }, [prompt]);
 
   const processFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -89,32 +97,55 @@ export const BriefPanel: React.FC<BriefPanelProps> = ({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold text-gray-700">Prompt</label>
-          <button
-            onClick={onEnhance}
-            disabled={!prompt.trim() || isEnhancing || isGenerating}
-            className="flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition cursor-pointer"
-            title="Auto-enhance prompt with MMV Brand Guidelines using Gemini"
-          >
-            {isEnhancing ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Enhancing...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                <span>Enhance</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center space-x-1 text-xs font-medium text-gray-500 hover:text-gray-800 transition cursor-pointer"
+              title={isExpanded ? "Collapse prompt box" : "Extend prompt box"}
+            >
+              {isExpanded ? (
+                <>
+                  <Minimize2 className="w-3.5 h-3.5 text-gray-500" />
+                  <span>Collapse</span>
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="w-3.5 h-3.5 text-gray-500" />
+                  <span>Extend</span>
+                </>
+              )}
+            </button>
+            <span className="text-gray-300">|</span>
+            <button
+              onClick={onEnhance}
+              disabled={!prompt.trim() || isEnhancing || isGenerating}
+              className="flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition cursor-pointer"
+              title="Auto-enhance prompt with MMV Brand Guidelines using Gemini"
+            >
+              {isEnhancing ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Enhancing...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Enhance</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         <textarea
-          rows={5}
+          rows={isExpanded ? 10 : 5}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Describe in detail what you want to see in your image (e.g. Red Xforce parked in showroom at dusk with festive lights)..."
-          className="w-full text-xs p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 resize-none text-gray-900 shadow-sm"
+          className={`w-full text-xs p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-gray-900 shadow-sm resize-y transition-all ${
+            isExpanded ? "min-h-[220px]" : "min-h-[105px]"
+          }`}
         />
       </div>
 
